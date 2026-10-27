@@ -1,0 +1,59 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+export default function PreviewModal({ template, onClose }) {
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    const onKey = (e) => e.key === "Escape" && onClose();
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [onClose]);
+
+  const copyUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(template.url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      alert("Copy failed. Please allow clipboard access.");
+    }
+  };
+
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-head">
+          <div>
+            <h3>Template {template.id}</h3>
+            <p className="muted small">
+              {template.category} · {template.stack}
+            </p>
+          </div>
+          <div className="modal-actions">
+            <button className="btn btn-outline" onClick={copyUrl}>
+              {copied ? "Copied!" : "Copy URL"}
+            </button>
+            <a
+              className="btn btn-primary"
+              href={template.url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Open
+            </a>
+            <button className="btn btn-ghost" onClick={onClose} aria-label="Close">
+              ✕
+            </button>
+          </div>
+        </div>
+        <iframe src={template.url} title={`Preview ${template.id}`} />
+      </div>
+    </div>
+  );
+}
