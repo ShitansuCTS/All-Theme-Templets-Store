@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 export default function PreviewModal({ template, onClose }) {
   const [copied, setCopied] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     const onKey = (e) => e.key === "Escape" && onClose();
@@ -29,7 +30,7 @@ export default function PreviewModal({ template, onClose }) {
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-head">
-          <div>
+          <div className="modal-title">
             <h3>Template {template.id}</h3>
             <p className="muted small">
               {template.category} · {template.stack}
@@ -52,7 +53,20 @@ export default function PreviewModal({ template, onClose }) {
             </button>
           </div>
         </div>
-        <iframe src={template.url} title={`Preview ${template.id}`} />
+
+        <div className="modal-body">
+          {!loaded && (
+            <div className="modal-loading">
+              <span className="spinner" />
+              Loading website...
+            </div>
+          )}
+          <iframe
+            src={template.url}
+            title={`Preview ${template.id}`}
+            onLoad={() => setLoaded(true)}
+          />
+        </div>
       </div>
     </div>
   );

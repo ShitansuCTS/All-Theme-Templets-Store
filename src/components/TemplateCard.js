@@ -1,24 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-
-const FRAME_WIDTH = 1280;
-const FRAME_HEIGHT = 800;
+import { useState } from "react";
 
 export default function TemplateCard({ template, onPreview }) {
-  const wrapRef = useRef(null);
-  const [scale, setScale] = useState(0.25);
   const [copied, setCopied] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  const [failed, setFailed] = useState(false);
 
-  useEffect(() => {
-    const el = wrapRef.current;
-    if (!el) return;
-    const update = () => setScale(el.clientWidth / FRAME_WIDTH);
-    update();
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
+  const thumb = `https://s0.wp.com/mshots/v1/${encodeURIComponent(
+    template.url
+  )}?w=800&h=500`;
 
   const copyUrl = async () => {
     try {
@@ -32,23 +23,28 @@ export default function TemplateCard({ template, onPreview }) {
 
   return (
     <article className="card">
-      <div
-        className="card-preview"
-        ref={wrapRef}
-        style={{ height: FRAME_HEIGHT * scale }}
-      >
-        <iframe
-          src={template.url}
-          title={`Template ${template.id}`}
-          loading="lazy"
-          tabIndex={-1}
-          scrolling="no"
-          style={{
-            width: FRAME_WIDTH,
-            height: FRAME_HEIGHT,
-            transform: `scale(${scale})`,
-          }}
-        />
+      <div className="card-preview tc-thumb-wrap">
+        {!loaded && !failed && <div className="tc-skeleton" />}
+
+        {failed ? (
+          <div className="tc-fallback">
+            <strong>{template.category}</strong>
+            <span>{template.stack}</span>
+          </div>
+        ) : (
+          <img
+            ref={(img) => {
+              if (img && img.complete && img.naturalWidth > 0) setLoaded(true);
+            }}
+            src={thumb}
+            alt={`Template ${template.id} preview`}
+            loading="lazy"
+            decoding="async"
+            onLoad={() => setLoaded(true)}
+            onError={() => setFailed(true)}
+            className={loaded ? "tc-thumb tc-thumb-loaded" : "tc-thumb"}
+          />
+        )}
 
         <span className="tc-badge">{template.stack}</span>
 
