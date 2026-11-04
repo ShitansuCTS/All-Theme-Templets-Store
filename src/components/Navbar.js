@@ -76,10 +76,20 @@ export default function Navbar({
     }
   };
 
+  const refreshPage = (e) => {
+    e.preventDefault();
+    window.location.reload();
+  };
+
   return (
     <header className="navbar">
       <div className="navbar-inner">
-        <div className="brand">
+        <a
+          href="/"
+          className="brand"
+          onClick={refreshPage}
+          aria-label={`${COMPANY_NAME} - refresh page`}
+        >
           {!logoError ? (
             <img
               src={LOGO_SRC}
@@ -89,7 +99,7 @@ export default function Navbar({
           ) : (
             <span className="brand-text">{COMPANY_NAME}</span>
           )}
-        </div>
+        </a>
 
         <div className="nav-controls">
           <Dropdown
